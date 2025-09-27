@@ -1,0 +1,25 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Python (api/)
+api/.venv/
+api/**/__pycache__/
+api/**/*.py[cod]
+api/.mypy_cache/
+api/.pytest_cache/
+api/.env
+api/media/
+api/staticfiles/
+
+# Node (web/)
+web/node_modules/
+web/.next/
+web/.env*
+web/out/
+
+# root venv (optional)
+.venv/
+
+# Logs
+*.log
