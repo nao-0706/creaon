@@ -1,6 +1,7 @@
-# api/users/urls.py
 from django.urls import path
+from .views import SignupView, MeView
 
 urlpatterns = [
-    # ここに /users/ のAPIを後で追加（signup, me など）
+    path("", SignupView.as_view(), name="user-signup"),   # POST /users/
+    path("me", MeView.as_view(), name="user-me"),         # GET/PATCH /users/me
 ]
