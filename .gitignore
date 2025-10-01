@@ -23,3 +23,7 @@ web/out/
 
 # Logs
 *.log
+
+!.env.local.example
+api/db.sqlite3
+web.env.backup
