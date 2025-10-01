@@ -31,4 +31,5 @@ urlpatterns = [
 
     # users（後で中身を作るための受け口だけ先に用意）
     path('users/', include('users.urls')),
+    path("", include("posts.urls")),
 ]
