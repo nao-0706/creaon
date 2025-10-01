@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 type Me = {
   id: number;
@@ -17,8 +18,15 @@ export default function MePage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const [linksText, setLinksText] = useState<string>(""); 
+  const [linksText, setLinksText] = useState<string>("");
   const [saving, setSaving] = useState(false);
+  const router = useRouter();
+
+  function logout() {
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+    router.push("/login");
+  }
 
   async function fetchMe() {
     setLoading(true);
@@ -106,6 +114,13 @@ async function saveLinks() {
     <main className="min-h-screen flex items-center justify-center p-6">
       <div className="w-full max-w-md rounded-2xl shadow p-6 space-y-4">
         <h1 className="text-2xl font-bold text-center">My profile</h1>
+
+        <button
+          onClick={logout}
+          className="w-full rounded-xl bg-gray-700 text-white py-2"
+        >
+          ログアウト
+        </button>
 
         <button
           onClick={fetchMe}
