@@ -9,12 +9,16 @@ type Me = {
   email: string;
   role: "viewer" | "artist" | "admin";
   bio?: string;
+  links?: Record<string, string>;
 };
 
 export default function MePage() {
   const [me, setMe] = useState<Me | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const [linksText, setLinksText] = useState<string>(""); 
+  const [saving, setSaving] = useState(false);
 
   async function fetchMe() {
     setLoading(true);
@@ -41,6 +45,7 @@ export default function MePage() {
 
       const data: Me = await res.json();
       setMe(data);
+      setLinksText(JSON.stringify(data.links ?? {}, null, 2));
     } catch (e: any) {
       setError(`通信エラー: ${e?.message ?? e}`);
     } finally {
@@ -53,6 +58,49 @@ export default function MePage() {
     fetchMe();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+async function saveLinks() {
+    setSaving(true);
+    setError(null);
+    try {
+      // 入力をJSONとして解析（失敗したらユーザに伝える）
+      let parsed: Record<string, string>;
+      try {
+        parsed = JSON.parse(linksText || "{}");
+      } catch {
+        setError("links は有効なJSONで入力してください（例: {\"instagram\": \"https://...\"}）");
+        return;
+      }
+
+      const API = process.env.NEXT_PUBLIC_API_BASE;
+      const access = localStorage.getItem("access");
+      if (!access) { setError("未ログインです。まず /signup か /login で取得してください。"); return; }
+
+      const res = await fetch(`${API}/users/me`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${access}`,
+        },
+        body: JSON.stringify({ links: parsed }),
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setError(`保存エラー: ${res.status} ${JSON.stringify(body)}`);
+        return;
+      }
+
+      const updated: Me = await res.json();
+      setMe(updated);
+      // サーバ反映に合わせて編集欄も整形し直す
+      setLinksText(JSON.stringify(updated.links ?? {}, null, 2));
+    } catch (e: any) {
+      setError(`通信エラー: ${e?.message ?? e}`);
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <main className="min-h-screen flex items-center justify-center p-6">
