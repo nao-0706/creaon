@@ -4,20 +4,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-type Me = {
-  id: number;
-  username: string;
-  email: string;
-  role: "viewer" | "artist" | "admin";
-  bio?: string;
-  links?: Record<string, string>;
-};
+// …（既存の Me 型に bio はもう含まれているのでそのままOK）…
 
 export default function MePage() {
   const [me, setMe] = useState<Me | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
   const [linksText, setLinksText] = useState<string>("");
   const [saving, setSaving] = useState(false);
   const router = useRouter();
@@ -28,23 +20,21 @@ export default function MePage() {
     router.push("/login");
   }
 
+  // 🔴 追加：bioの編集用テキスト＆保存中フラグ
+  const [bioText, setBioText] = useState<string>("");        // 🔴
+  const [savingBio, setSavingBio] = useState(false);          // 🔴
+
   async function fetchMe() {
     setLoading(true);
     setError(null);
-
     try {
       const API = process.env.NEXT_PUBLIC_API_BASE;
-      const access = localStorage.getItem("access"); // サインアップ/ログイン時に保存済み
-
-      if (!access) {
-        setError("未ログインです。まず /signup か /login で取得してください。");
-        return;
-      }
+      const access = localStorage.getItem("access");
+      if (!access) { setError("未ログインです。まず /signup か /login で取得してください。"); return; }
 
       const res = await fetch(`${API}/users/me`, {
         headers: { Authorization: `Bearer ${access}` },
       });
-
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         setError(`エラー: ${res.status} ${JSON.stringify(body)}`);
@@ -54,6 +44,7 @@ export default function MePage() {
       const data: Me = await res.json();
       setMe(data);
       setLinksText(JSON.stringify(data.links ?? {}, null, 2));
+      setBioText(data.bio ?? "");                            // 🔴 取得したbioを編集欄へ
     } catch (e: any) {
       setError(`通信エラー: ${e?.message ?? e}`);
     } finally {
@@ -61,25 +52,11 @@ export default function MePage() {
     }
   }
 
-  // 初回表示時に自動取得（必要なら手動ボタンだけにしてもOK）
-  useEffect(() => {
-    fetchMe();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-async function saveLinks() {
-    setSaving(true);
+  // 🔴 追加：bio を PATCH で保存
+  async function saveBio() {
+    setSavingBio(true);
     setError(null);
     try {
-      // 入力をJSONとして解析（失敗したらユーザに伝える）
-      let parsed: Record<string, string>;
-      try {
-        parsed = JSON.parse(linksText || "{}");
-      } catch {
-        setError("links は有効なJSONで入力してください（例: {\"instagram\": \"https://...\"}）");
-        return;
-      }
-
       const API = process.env.NEXT_PUBLIC_API_BASE;
       const access = localStorage.getItem("access");
       if (!access) { setError("未ログインです。まず /signup か /login で取得してください。"); return; }
@@ -90,7 +67,7 @@ async function saveLinks() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${access}`,
         },
-        body: JSON.stringify({ links: parsed }),
+        body: JSON.stringify({ bio: bioText }),
       });
 
       if (!res.ok) {
@@ -101,12 +78,11 @@ async function saveLinks() {
 
       const updated: Me = await res.json();
       setMe(updated);
-      // サーバ反映に合わせて編集欄も整形し直す
-      setLinksText(JSON.stringify(updated.links ?? {}, null, 2));
+      setBioText(updated.bio ?? "");                         // 🔴 サーバ反映で整える
     } catch (e: any) {
       setError(`通信エラー: ${e?.message ?? e}`);
     } finally {
-      setSaving(false);
+      setSavingBio(false);
     }
   }
 
@@ -133,12 +109,47 @@ async function saveLinks() {
         {error && <p className="text-sm text-center text-red-500">{error}</p>}
 
         {me && (
-          <div className="text-sm space-y-2">
+          <div className="text-sm space-y-3">
             <p><span className="font-semibold">ID:</span> {me.id}</p>
             <p><span className="font-semibold">Username:</span> {me.username}</p>
             <p><span className="font-semibold">Email:</span> {me.email}</p>
             <p><span className="font-semibold">Role:</span> {me.role}</p>
-            {me.bio && <p><span className="font-semibold">Bio:</span> {me.bio}</p>}
+
+            {/* 🔴 追加：bio 編集UI */}
+            <div className="space-y-2">
+              <label className="font-semibold">Bio</label>
+              <textarea
+                className="w-full h-24 rounded border p-2"
+                value={bioText}
+                onChange={(e) => setBioText(e.target.value)}
+                placeholder="自己紹介を入力してください"
+              />
+              <button
+                onClick={saveBio}
+                disabled={savingBio}
+                className="w-full rounded-xl bg-black text-white py-2 disabled:opacity-60"
+              >
+                {savingBio ? "保存中..." : "bio を保存"}
+              </button>
+            </div>
+
+            {/* 既存の links 編集UI はそのまま */}
+            <div className="space-y-2">
+              <label className="font-semibold">Links (JSON)</label>
+              <textarea
+                className="w-full h-40 rounded border p-2 font-mono text-xs"
+                value={linksText}
+                onChange={(e) => setLinksText(e.target.value)}
+                placeholder='例: {"instagram":"https://instagram.com/your_id"}'
+              />
+              <button
+                onClick={saveLinks}
+                disabled={saving}
+                className="w-full rounded-xl bg-black text-white py-2 disabled:opacity-60"
+              >
+                {saving ? "保存中..." : "links を保存"}
+              </button>
+            </div>
           </div>
         )}
 

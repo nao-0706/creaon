@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,8 +25,6 @@ SECRET_KEY = 'django-insecure-r#qhr@q4uqtbmv%dkr5_lr@_k*xv@!9l$nz4+ri@5_p@x+)x9y
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -52,6 +51,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 ROOT_URLCONF = 'config.urls'
 
@@ -134,10 +135,19 @@ REST_FRAMEWORK = {
     ),
 }
 
-# 開発中は全部許可でもOK。後でAllowlistに切替
-CORS_ALLOW_ALL_ORIGINS = True
-# 将来はこちらに切替:
-# CORS_ALLOWED_ORIGINS = ['http://localhost:3000', 'http://127.0.0.1:3000']
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),  # 開発中は30分で十分
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),     # 1週間で再ログイン
+    # 必要になったらここに他のオプションも追加（例：ALGORITHM、ROTATE_REFRESH_TOKENS等）
+}
 
+# 開発中は全部許可でもOK。後でAllowlistに切替
+CORS_ALLOW_ALL_ORIGINS = False
+
+# 将来はこちらに切替:
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
 AUTH_USER_MODEL = 'users.User'
 
