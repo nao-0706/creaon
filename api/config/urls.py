@@ -20,6 +20,8 @@ from django.urls import path, include
 from rest_framework_simplejwt.views import (
     TokenObtainPairView, TokenRefreshView, TokenVerifyView
 )
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -32,4 +34,8 @@ urlpatterns = [
     # users（後で中身を作るための受け口だけ先に用意）
     path('users/', include('users.urls')),
     path("", include("posts.urls")),
+    path("api-auth/", include("rest_framework.urls")),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
