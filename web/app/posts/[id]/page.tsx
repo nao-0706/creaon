@@ -1,5 +1,8 @@
 // web/app/posts/[id]/page.tsx
 import { apiFetch, API_BASE } from "../../lib/api";
+import LikeButton from "@/components/LikeButton";
+import { apiJson } from "@/lib/fetcher";
+
 type Post = {
   id: number;
   title: string;
@@ -7,6 +10,8 @@ type Post = {
   type: "image" | "audio" | "video" | "other";
   media: string | null;
   created_at: string;
+  like_count: number;
+  liked: boolean;
 };
 
 function Media({ type, src }: { type: Post["type"]; src: string | null }) {
@@ -28,11 +33,21 @@ export default async function PostDetail({ params }: { params: { id: string } })
   const p: Post = await res.json();
 
   return (
-    <main className="max-w-2xl mx-auto p-6 space-y-4">
+  <main className="mx-auto max-w-2xl p-6 space-y-4">
+    {/* タイトル行：左タイトル / 右♡ボタン */}
+    <div className="flex items-center justify-between gap-4">
       <h1 className="text-2xl font-bold">{p.title}</h1>
-      <div className="text-gray-500">{new Date(p.created_at).toLocaleString()}</div>
-      <Media type={p.type} src={p.media} />
-      {p.description && <p className="whitespace-pre-wrap">{p.description}</p>}
-    </main>
+      <LikeButton postId={p.id} liked={p.liked} likeCount={p.like_count} />
+    </div>
+
+    <div className="text-gray-500">{new Date(p.created_at).toLocaleString()}</div>
+
+    <Media type={p.type} src={p.media} />
+
+    {p.description && (
+      <p className="whitespace-pre-wrap">{p.description}</p>
+    )}
+  </main>
   );
 }
+
