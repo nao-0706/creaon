@@ -1,21 +1,17 @@
 from rest_framework import viewsets, permissions
-from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Post
 from .serializers import PostSerializer
 from .permissions import IsAuthorOrReadOnly
+from rest_framework.parsers import JSONParser, FormParser, MultiPartParser
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.select_related("author").order_by("-id")
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
-    parser_classes = [MultiPartParser, FormParser]
+    # parser_classes = [MultiPartParser, FormParser]
+    parser_classes = (JSONParser, FormParser, MultiPartParser)
 
     def get_queryset(self):
-        print(self.queryset)
-        print(self.serializer_class)
-        print(self.permission_classes)
-        print(self.parser_classes)
-
         # 一覧/詳細で毎回通る。← ここにブレークポイント
         return super().get_queryset()
 
