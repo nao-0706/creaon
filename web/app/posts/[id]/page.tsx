@@ -28,7 +28,8 @@ function Media({ type, src }: { type: Post["type"]; src: string | null }) {
 }
 
 export default async function PostDetail({ params }: { params: { id: string } }) {
-  const res = await apiFetch(`/posts/${params.id}/`);
+  // const res = await apiFetch(`/posts/${params.id}/`);
+  const res = await apiFetch(`/api/posts/${params.id}/`);
   if (!res.ok) return <div className="p-6">Not found.</div>;
   const p: Post = await res.json();
 
