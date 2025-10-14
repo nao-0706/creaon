@@ -1,0 +1,33 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Django (runserver)",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/api/manage.py",
+      "args": ["runserver", "127.0.0.1:8000"],
+      "django": true,
+      "cwd": "${workspaceFolder}/api",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "Next.js (npm run dev)",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "/Users/koyamanaoki/.nvm/versions/node/v22.20.0/bin/npm",
+      "runtimeArgs": ["run", "dev", "--", "-p", "3000"],
+      "cwd": "${workspaceFolder}/web",
+      "console": "integratedTerminal",
+      "autoAttachChildProcesses": true
+    }
+  ],
+  "compounds": [
+    {
+      "name": "All (Django + Next)",
+      "configurations": ["Django (runserver)", "Next.js (node next dev)"],
+      "stopAll": true
+    }
+ ]
+}
