@@ -1,7 +1,6 @@
 from __future__ import annotations
 import os
 from uuid import uuid4
-
 from django.conf import settings
 from django.db import models
 
@@ -18,6 +17,10 @@ def post_media_path(instance: "Post", filename: str) -> str:
     base, ext = os.path.splitext(filename)
     return f"posts/{instance.author_id}/{uuid4().hex}{ext.lower()}"
 
+class PostLike(models.Model):
+    post = models.ForeignKey("posts.Post", related_name="likes", on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="post_likes", on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 class Post(models.Model):
     author = models.ForeignKey(
