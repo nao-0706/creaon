@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Django (runserver)",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/api/manage.py",
+      "args": ["runserver", "127.0.0.1:8000"],
+      "django": true,
+      "cwd": "${workspaceFolder}/api",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    }
+  ]
+}
