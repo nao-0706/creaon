@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { apiFetch } from "@/lib/fetcher";
+import apiFetch from "@/lib/fetcher";
 
 type Props = {
   postId: number;

@@ -1,7 +1,6 @@
 // web/app/posts/[id]/page.tsx
 import { apiFetch, API_BASE } from "../../lib/api";
 import LikeButton from "@/components/LikeButton";
-// import { apiJson } from "@/lib/fetcher"; // 使ってなければ消してOK
 
 type Post = {
   id: number;
